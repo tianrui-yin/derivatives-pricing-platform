@@ -89,6 +89,26 @@ class InterestRateSwap(BaseInterestRateProduct):
         if forward_rates is not None:
             self.forward_rates = np.array(forward_rates)
 
+    def set_curve(self, yield_curve):
+        """
+        Définit la courbe des taux à partir d'un objet YieldCurve (bootstrappé ou paramétrique).
+
+        Extrait les facteurs d'actualisation et les taux forward aux dates de paiement.
+
+        Paramètres:
+        -----------
+        yield_curve : YieldCurve ou NelsonSiegelCurve
+            Courbe des taux construite (bootstrap ou Nelson-Siegel)
+        """
+        self.discount_factors = np.array([
+            yield_curve.discount_factor(t) for t in self.payment_times
+        ])
+        delta = 1.0 / self.payment_frequency
+        self.forward_rates = np.array([
+            yield_curve.forward_rate(max(t - delta, 0.0), t)
+            for t in self.payment_times
+        ])
+
     def _generate_default_curve(self, flat_rate=0.025):
         """
         Génère une courbe plate pour les tests.
@@ -283,6 +303,24 @@ class Cap(BaseDerivative):
         self.discount_factors = np.array(discount_factors)
         self.forward_rates = np.array(forward_rates)
 
+    def set_curve(self, yield_curve):
+        """
+        Définit les données de marché à partir d'un objet YieldCurve.
+
+        Paramètres:
+        -----------
+        yield_curve : YieldCurve ou NelsonSiegelCurve
+            Courbe des taux construite
+        """
+        self.discount_factors = np.array([
+            yield_curve.discount_factor(t) for t in self.payment_times
+        ])
+        delta = 1.0 / self.payment_frequency
+        self.forward_rates = np.array([
+            yield_curve.forward_rate(max(t - delta, 0.0), t)
+            for t in self.fixing_times
+        ])
+
     def _generate_default_market(self, flat_rate=0.02):
         """
         Génère des données de marché par défaut.
@@ -381,6 +419,24 @@ class Floor(BaseDerivative):
         """
         self.discount_factors = np.array(discount_factors)
         self.forward_rates = np.array(forward_rates)
+
+    def set_curve(self, yield_curve):
+        """
+        Définit les données de marché à partir d'un objet YieldCurve.
+
+        Paramètres:
+        -----------
+        yield_curve : YieldCurve ou NelsonSiegelCurve
+            Courbe des taux construite
+        """
+        self.discount_factors = np.array([
+            yield_curve.discount_factor(t) for t in self.payment_times
+        ])
+        delta = 1.0 / self.payment_frequency
+        self.forward_rates = np.array([
+            yield_curve.forward_rate(max(t - delta, 0.0), t)
+            for t in self.fixing_times
+        ])
 
     def _generate_default_market(self, flat_rate=0.02):
         """

@@ -20,6 +20,7 @@ from .barrier_options import BarrierOption
 from .asian_options import AsianOption
 from .lookback_options import LookbackOption
 from .interest_rate import InterestRateSwap, Cap, Floor
+from .yield_curve import YieldCurve, NelsonSiegelCurve
 from .repo_forward import Repo, Forward
 
 __version__ = "1.0.0"
